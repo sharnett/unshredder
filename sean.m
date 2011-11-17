@@ -19,7 +19,6 @@ end
 rgb = rgb(:,J,:);
 figure;
 image(rgb); axis image;
-imwrite(rgb, 'test.tif','tif');
 pause;
 
 % reassemble
@@ -29,12 +28,7 @@ rgbR = rgb2(:,thickness:thickness:width);
 
 c=zeros(n);
 for i=1:n, c(i,:) = pdist2(rgbR(:,i)', rgbL'); end
-a=[ones(1,n) zeros(1,n*(n-1))];
-A=a;
-for i=1:n-1,
-    A = sparse([A; circshift(a, [0 i*n])]);
-end
-A=sparse([A;repmat(eye(n),1,n)]);
+A=[kron(speye(n),ones(1,n)); repmat(speye(n),1,n)];
 b=ones(2*n,1);
 
 x=linprog(reshape(c,n^2,1),[],[],A,b,zeros(n^2,1),[]);
