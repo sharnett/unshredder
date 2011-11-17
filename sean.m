@@ -28,7 +28,8 @@ rgbR = rgb2(:,thickness:thickness:width);
 
 c=zeros(n);
 for i=1:n, c(i,:) = pdist2(rgbR(:,i)', rgbL'); end
-A=[kron(speye(n),ones(1,n)); repmat(speye(n),1,n)];
+u = speye(n); v = ones(1,n);
+A=[kron(u,v); kron(v,u)];
 b=ones(2*n,1);
 
 x=linprog(reshape(c,n^2,1),[],[],A,b,zeros(n^2,1),[]);
