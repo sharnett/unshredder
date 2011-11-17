@@ -1,0 +1,6 @@
+Pretty sloppy right now
+
+sean.m will take an image and slice thickness, shred the image, then reassemble it
+it models it as an assignment problem (!... works surprisingly well)
+
+sean3.m is my preliminary take on detecting slice thickness
