@@ -1,4 +1,6 @@
 function sean(picture, thickness)
+
+% load
 if nargin<1, picture='cat1.jpg'; end;
 if nargin<2, thickness = 32; end;
 rgb = imread(picture);
@@ -10,7 +12,7 @@ image(rgb); axis image;
 pause;
 n = width/thickness;
 
-% shuffle
+% shred
 I = randperm(n);
 J=[];
 for i=1:length(I),
@@ -21,11 +23,12 @@ figure;
 image(rgb); axis image;
 pause;
 
-% reassemble
+% only concerned with the edges of each slice
 rgb2 = double([rgb(:,:,1); rgb(:,:,2); rgb(:,:,3)]);
 rgbL = rgb2(:,1:thickness:width);
 rgbR = rgb2(:,thickness:thickness:width);
 
+% build the linear optimization problem
 c=zeros(n);
 for i=1:n, c(i,:) = pdist2(rgbR(:,i)', rgbL'); end
 u = speye(n); v = ones(1,n);
@@ -35,6 +38,8 @@ b=ones(2*n,1);
 x=linprog(reshape(c,n^2,1),[],[],A,b,zeros(n^2,1),[]);
 x=sparse(reshape(round(x),n,n));
 
+% solution is a loop. need to decide where to cut the loop
+% start with the connection with greatest cost, and descend if necessary
 [i,j,v] = find(c.*x); [y, K] = sort(v, 'descend'); 
 figure;
 for k=1:n,
