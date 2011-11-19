@@ -5,26 +5,34 @@ if nargin<1, picture='cat1.jpg'; end;
 if nargin<2, thickness = 32; end;
 rgb = imread(picture);
 height = size(rgb,1);
-width = size(rgb,2)
+width = size(rgb,2);
 width = width-mod(width,thickness);
 rgb = rgb(:,1:width,:);
-image(rgb); axis image;
-pause;
+%image(rgb); axis image;
+%pause;
 n = width/thickness;
 
 % shred
 I = randperm(n);
-J=[];
+J=zeros(width,1);
 for i=1:length(I),
-    J=[J (I(i)-1)*thickness+1:I(i)*thickness];
+    J([(i-1)*thickness+1:i*thickness]) = (I(i)-1)*thickness+1:I(i)*thickness;
 end
 rgb = rgb(:,J,:);
 figure;
 image(rgb); axis image;
 pause;
 
-% only concerned with the edges of each slice
+% lets recover the thickness here
 rgb2 = double([rgb(:,:,1); rgb(:,:,2); rgb(:,:,3)]);
+a = [];
+for j=1:width-1, a(j) = norm(rgb2(:,j)-rgb2(:,j+1)); end
+[a, lags] = xcorr(diff(a)); 
+I=width:length(a);
+[m,i] = max(a(I));
+thickness = lags(I(i));
+
+% only concerned with the edges of each slice
 rgbL = rgb2(:,1:thickness:width);
 rgbR = rgb2(:,thickness:thickness:width);
 
