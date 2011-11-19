@@ -19,8 +19,13 @@ pause;
 
 % detect slice thickness
 thickness = detectthickness(rgb);
-fprintf(1, 'thickness is %d\n', thickness);
+fprintf(1, 'detected thickness is %d\n', thickness);
+if mod(size(rgb,2), thickness) ~= 0, 
+    disp('detected thickness is definitely wrong. quitting');
+    return;
+end
 
 % unshred
+disp('unshredding...');
 rbg = unshred(rgb, thickness);
 close all;

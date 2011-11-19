@@ -9,13 +9,15 @@ rgbR = rgb2(:,thickness:thickness:width);
 
 % build the linear optimization problem
 c=zeros(n);
-for i=1:n, c(i,:) = pdist2(rgbR(:,i)', rgbL'); end
+for i=1:n, c(i,:) = seanpdist2(rgbR(:,i), rgbL); end
 u = speye(n); v = ones(1,n);
 A=[kron(u,v); kron(v,u)];
 b=ones(2*n,1);
+lb = zeros(n^2,1);
+ub = Inf*ones(n^2,1);
 
 % solve it
-x=linprog(reshape(c,n^2,1),[],[],A,b,zeros(n^2,1),[]);
+x=linprog(reshape(c,n^2,1),[],[],A,b,lb,ub);
 x=sparse(reshape(round(x),n,n));
 
 % solution is a loop. need to decide where to cut the loop
@@ -36,3 +38,9 @@ for k=1:n,
         break; 
     end 
 end
+
+% finds the distance between x and each column of Y
+function d = seanpdist2(x, Y),
+    n = size(Y,2);
+    d = zeros(n,1);
+    for i=1:n, d(i) = norm(x-Y(:,i)); end
