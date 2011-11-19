@@ -1,67 +1,26 @@
 function sean(picture, thickness)
 
+close all;
+
 % load
 if nargin<1, picture='cat1.jpg'; end;
 if nargin<2, thickness = 32; end;
 rgb = imread(picture);
-height = size(rgb,1);
-width = size(rgb,2);
-width = width-mod(width,thickness);
-rgb = rgb(:,1:width,:);
-%image(rgb); axis image;
-%pause;
-n = width/thickness;
-
-% shred
-I = randperm(n);
-J=zeros(width,1);
-for i=1:length(I),
-    J([(i-1)*thickness+1:i*thickness]) = (I(i)-1)*thickness+1:I(i)*thickness;
-end
-rgb = rgb(:,J,:);
-figure;
 image(rgb); axis image;
+disp('here is the original image. hit enter to continue');
 pause;
 
-% lets recover the thickness here
-rgb2 = double([rgb(:,:,1); rgb(:,:,2); rgb(:,:,3)]);
-a = [];
-for j=1:width-1, a(j) = norm(rgb2(:,j)-rgb2(:,j+1)); end
-[a, lags] = xcorr(diff(a)); 
-I=width:length(a);
-[m,i] = max(a(I));
-thickness = lags(I(i));
+% shred
+rgb = shred(rgb, thickness);
+image(rgb); axis image;
+fprintf(1, 'image has been shredded with slices %d pixels thick\n', thickness);
+disp('hit enter to continue');
+pause;
 
-% only concerned with the edges of each slice
-rgbL = rgb2(:,1:thickness:width);
-rgbR = rgb2(:,thickness:thickness:width);
+% detect slice thickness
+thickness = detectthickness(rgb);
+fprintf(1, 'thickness is %d\n', thickness);
 
-% build the linear optimization problem
-c=zeros(n);
-for i=1:n, c(i,:) = pdist2(rgbR(:,i)', rgbL'); end
-u = speye(n); v = ones(1,n);
-A=[kron(u,v); kron(v,u)];
-b=ones(2*n,1);
-
-x=linprog(reshape(c,n^2,1),[],[],A,b,zeros(n^2,1),[]);
-x=sparse(reshape(round(x),n,n));
-
-% solution is a loop. need to decide where to cut the loop
-% start with the connection with greatest cost, and descend if necessary
-[i,j,v] = find(c.*x); [y, K] = sort(v, 'descend'); 
-figure;
-for k=1:n,
-    I = j(K(k));
-    for i=2:n,
-        I(i) = find(x(I(i-1),:));
-    end
-    if length(I) > length(unique(I)), 
-        disp('subtour!'); 
-    end
-    J=[];
-    for i=1:length(I),
-        J=[J (I(i)-1)*thickness+1:I(i)*thickness];
-    end
-    image(rgb(:,J,:)); axis image;
-    pause;
-end
+% unshred
+rbg = unshred(rgb, thickness);
+close all;
