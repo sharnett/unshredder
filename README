@@ -1,6 +1,10 @@
-Pretty sloppy right now
+shred.m takes an array of image data and a desired slice thickness, and returns
+an image array shredded into slices of that thickness
 
-sean.m will take an image and slice thickness, shred the image, then reassemble it
-it models it as an assignment problem (!... works surprisingly well)
+detectthickness.m takes a shredded image array and uses autocorrelation (black
+magic) to determine the slice width
 
-sean3.m is my preliminary take on detecting slice thickness
+unshred.m takes a shredded image array and a thickness, and unshuffles the image.
+It models it as an assignment problem and solves it with a standard LP solver.
+
+sean.m is a simple script that shows all the pieces in action
