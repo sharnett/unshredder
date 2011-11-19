@@ -1,10 +1,44 @@
+This is a collection of MATLAB/Octave scripts to shred and unshred images.
+
+For Octave users, I've included two extra files, xcorr.m and linprog.m, that
+weren't included in my vanilla installation of Octave. You might need these.
+
+For MATLAB users, xcorr.m is part of the stats toolbox which you might not have. 
+You should be able to modify the Octave xcorr.m to work with MATLAB, or just use 
+Octave, or just not use the slice thickness detector script. linprog.m is part
+of the optimization toolbox, and is needed for the unshredder.
+
+--------------------------------------------------------------------------------
+
+Getting started: look at sean.m, an example that shows all the pieces in action
+
 shred.m takes an array of image data and a desired slice thickness, and returns
 an image array shredded into slices of that thickness
 
 detectthickness.m takes a shredded image array and uses autocorrelation (black
-magic) to determine the slice width
+magic) to determine the slice thickness
 
 unshred.m takes a shredded image array and a thickness, and unshuffles the image.
 It models it as an assignment problem and solves it with a standard LP solver.
 
-sean.m is a simple script that shows all the pieces in action
+--------------------------------------------------------------------------------
+
+Comments on the unshred algorithm
+
+Modeling it as assignment problem allows slices to be matched with themselves. It 
+also allows 'subtours' where you have multiple subsets of slices, and within each 
+subset the slices match each other, but the different subsets don't fit together. 
+This pretty much never happened for the images I tested, with the exception of 
+very small slice widths, like 2px.
+
+You could prevent this issue by modeling it as a traveling salesman problem, which 
+is a lot harder. When I started working on this, that's what I had in mind, but 
+was pleasantly surprised to find it wasn't necessary.
+
+One last thing: the answer is always a "loop" in that the left edge is connected
+to the right edge. I didn't bother coming up with a smart way around this. I just 
+disconnect the loop at the connection of greatest distance. You might notice this
+doesn't work for Instagram's sample Tokyo photo, but the unshredder let's you
+cycle through all of the possible chop points in descending order. The third one
+happens to be correct for the Tokyo photo. I didn't have this problem with any
+of the other images I tried.
